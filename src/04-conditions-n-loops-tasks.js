@@ -170,13 +170,14 @@ function isInsideCircle(circle, point) {
  *   'entente' => null
  */
 function findFirstSingleChar(str) {
-  return str
+  return (
+    str
       .split('')
       .find(
         (char, i, arr) =>
           arr.indexOf(char) === i && arr.indexOf(char, i + 1) === -1
-    )
-    || null;
+      ) || null
+  );
 }
 
 /**
@@ -262,12 +263,22 @@ function reverseInteger(num) {
  *   4916123456789012 => false
  */
 function isCreditCardNumber(ccn) {
-  return String(ccn)
+  return (
+    String(ccn)
       .split('')
       .reverse()
       .map(Number)
-      .map((d, i, arr) => (i % 2 === 1 ? (d * 2 > 9 ? d * 2 - 9 : d * 2) : d))
-      .reduce((sum, d) => sum + d, 0) % 10 === 0;
+      .map((d, i) => {
+        if (i % 2 === 1) {
+          const doubled = d * 2;
+          return doubled > 9 ? doubled - 9 : doubled;
+        }
+        return d;
+      })
+      .reduce((sum, d) => sum + d, 0) %
+      10 ===
+    0
+  );
 }
 
 /**
@@ -285,21 +296,12 @@ function isCreditCardNumber(ccn) {
  *   165536 (1+6+5+5+3+6 = 26,  2+6 = 8) => 8
  */
 function getDigitalRoot(num) {
-  return String(num)
+  if (num < 10) return num;
+  const sum = String(num)
     .split('')
     .map(Number)
-    .reduce((sum, n) => sum + n, 0)
-    .toString()
-    .split('')
-    .map(Number)
-    .reduce((sum, n) => (sum > 9 ? sumDigits(sum) : sum), 0);
-
-  function sumDigits(n) {
-    return String(n)
-      .split('')
-      .map(Number)
-      .reduce((s, x) => s + x, 0);
-  }
+    .reduce((s, n) => s + n, 0);
+  return getDigitalRoot(sum);
 }
 
 /**
@@ -380,12 +382,18 @@ function toNaryString(num, n) {
  */
 function getCommonDirectoryPath(paths) {
   if (paths.length === 0) return '';
-  const splitPaths = paths.map(p => p.split('/'));
-  return splitPaths[0]
-    .map((_, i) => splitPaths.map(p => p[i]))
-    .filter(parts => parts.every(p => p === parts[0]))
-    .map(parts => parts[0])
-    .join('/') + (paths[0].startsWith('/') ? '/' : '');
+
+  const allAbsolute = paths.every((p) => p.startsWith('/'));
+  const allRelative = paths.every((p) => !p.startsWith('/'));
+  if (!allAbsolute && !allRelative) return '';
+
+  const splitPaths = paths.map((p) => p.split('/'));
+  const commonSegments = splitPaths[0].filter((_, i) =>
+    splitPaths.every((p) => p[i] === splitPaths[0][i])
+  );
+
+  if (commonSegments.length === 0) return '';
+  return `${commonSegments.join('/')}/`;
 }
 
 /**
@@ -407,10 +415,10 @@ function getCommonDirectoryPath(paths) {
  *
  */
 function getMatrixProduct(m1, m2) {
-  const rows = m1.length;
-  const cols = m2[0].length;
-  const m2T = m2[0].map((_, i) => m2.map(row => row[i])); // транспонируем m2
-  return m1.map(row => m2T.map(col => row.reduce((sum, val, i) => sum + val * col[i], 0)));
+  const m2T = m2[0].map((_, i) => m2.map((row) => row[i])); // транспонируем m2
+  return m1.map((row) =>
+    m2T.map((col) => row.reduce((sum, val, i) => sum + val * col[i], 0))
+  );
 }
 
 /**
@@ -446,12 +454,15 @@ function getMatrixProduct(m1, m2) {
 function evaluateTicTacToePosition(position) {
   const lines = [
     ...position,
-    ...position[0].map((_, col) => position.map(row => row[col])),
+    ...position[0].map((_, col) => position.map((row) => row[col])),
     position.map((row, i) => row[i]),
-    position.map((row, i) => row[2 - i])
+    position.map((row, i) => row[2 - i]),
   ];
 
-  const winner = lines.find(line => line.every(cell => cell === 'X') || line.every(cell => cell === '0'));
+  const winner = lines.find(
+    (line) =>
+      line.every((cell) => cell === 'X') || line.every((cell) => cell === '0')
+  );
   return winner ? winner[0] : undefined;
 }
 
