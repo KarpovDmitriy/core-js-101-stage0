@@ -452,17 +452,29 @@ function getMatrixProduct(m1, m2) {
  *
  */
 function evaluateTicTacToePosition(position) {
-  const lines = [
-    ...position,
-    ...position[0].map((_, col) => position.map((row) => row[col])),
-    position.map((row, i) => row[i]),
-    position.map((row, i) => row[2 - i]),
-  ];
+  const size = 3;
+
+  const getCell = (row, col) =>
+    position[row] ? position[row][col] : undefined;
+
+  const rows = Array.from({ length: size }, (elX, i) =>
+    Array.from({ length: size }, (elY, j) => getCell(i, j))
+  );
+  const cols = Array.from({ length: size }, (elX, i) =>
+    Array.from({ length: size }, (elY, j) => getCell(j, i))
+  );
+  const diag1 = Array.from({ length: size }, (elX, i) => getCell(i, i));
+  const diag2 = Array.from({ length: size }, (elX, i) =>
+    getCell(i, size - 1 - i)
+  );
+
+  const lines = [...rows, ...cols, diag1, diag2];
 
   const winner = lines.find(
     (line) =>
       line.every((cell) => cell === 'X') || line.every((cell) => cell === '0')
   );
+
   return winner ? winner[0] : undefined;
 }
 
